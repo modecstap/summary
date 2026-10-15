@@ -127,7 +127,7 @@ AGENTS.md          instructions for coding agents (CLAUDE.md points to it)
 ## Configuration
 
 - `CURSOR_API_KEY` environment variable — required for running. If it is unset or blank, the tool fails before creating a run dir.
-- `rules/summary.md` — rules for the summary. Edit it to change the summary without code changes; it is re-read at every run. Currently it is a placeholder: a brief summary of all documents together, in the documents' language, with no length or structure limits.
+- `rules/summary.md` — rules for the summary. Edit it to change the summary without code changes; it is re-read at every run. Currently it asks for a legal review summary in the documents' language with a fixed structure: scope of review, overall assessment, key findings, material risks rated High / Medium / Low / Open, gaps and inconsistencies, and action items.
 - Model — set by the `MODEL` constant in `summary/main.py`, currently `composer-2.5`. It is not configurable by CLI or environment variable; change the constant to use another model.
 
 ## Testing
