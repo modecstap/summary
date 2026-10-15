@@ -1,6 +1,6 @@
 # summary
 
-TODO: one-line project description.
+Python CLI that turns a folder of PDFs and document photos into one summary written by a Cursor agent.
 
 ## Commands
 
