@@ -13,3 +13,4 @@ Save plans to `.agents/plans/` (gitignored).
 ## Docs
 
 - [Agent setup / onboarding](.agents/docs/onboarding.md) — read when wiring a new agent or changing the agent layout.
+- [docs index](.agents/docs/Index.md) - read always
