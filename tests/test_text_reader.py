@@ -1,3 +1,4 @@
+import logging
 import shutil
 from pathlib import Path
 
@@ -35,20 +36,26 @@ def fake_ocr(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("summary.text_reader.ocr.recognise_image", lambda image: "ok")
 
 
-def test_pdf_text_layer_without_ocr(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_pdf_text_layer_without_ocr(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
     def fail(image: Image.Image) -> str:
         raise AssertionError("OCR must not run for pages with a text layer")
 
     monkeypatch.setattr("summary.text_reader.ocr.recognise_image", fail)
+    caplog.set_level(logging.DEBUG, logger="summary.text_reader.pdf")
     text = read_text(PDF_SAMPLE)
     assert "Статья 13. Признание недействительным акта государственного органа или" in text
+    assert f"{PDF_SAMPLE.name} page 1: text layer" in caplog.messages
 
 
-def test_image_only_pdf_uses_ocr(tmp_path: Path) -> None:
+def test_image_only_pdf_uses_ocr(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     scan = tmp_path / "scan.pdf"
     with pymupdf.open(JPG_SAMPLE) as image_document:
         scan.write_bytes(image_document.convert_to_pdf())
+    caplog.set_level(logging.DEBUG, logger="summary.text_reader.pdf")
     assert JPG_HEADINGS[0] in read_text(scan)
+    assert "scan.pdf page 1: OCR" in caplog.messages
 
 
 def test_jpg_headings(jpg_text: str) -> None:

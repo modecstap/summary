@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import pymupdf
@@ -5,6 +6,8 @@ from PIL import Image
 
 from . import ocr, paragraph
 from .errors import UnreadableDocumentError
+
+logger = logging.getLogger(__name__)
 
 _SCAN_DPI = 300
 _TEXT_BLOCK = 0
@@ -19,18 +22,20 @@ def read_pdf(path: Path) -> str:
     with document:
         if document.needs_pass:
             raise UnreadableDocumentError(path)
-        page_texts = (_read_page(page) for page in document)
+        page_texts = (_read_page(page, path.name) for page in document)
         return "\n".join(text for text in page_texts if text)
 
 
-def _read_page(page: pymupdf.Page) -> str:
+def _read_page(page: pymupdf.Page, name: str) -> str:
     blocks = [
         block[4]
         for block in page.get_text("blocks")
         if block[6] == _TEXT_BLOCK and block[4].strip()
     ]
     if blocks:
+        logger.debug("%s page %d: text layer", name, page.number + 1)
         return "\n".join(paragraph.join_lines(block.splitlines()) for block in blocks)
+    logger.debug("%s page %d: OCR", name, page.number + 1)
     pixmap = page.get_pixmap(dpi=_SCAN_DPI)
     image = Image.frombytes("RGB", (pixmap.width, pixmap.height), pixmap.samples)
     return ocr.recognise_image(image)
