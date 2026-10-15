@@ -29,6 +29,7 @@ It extracts the text of each document, from the PDF text layer or with local OCR
 - Takes the summary rules from `rules/summary.md`, which is re-read at every run.
 - Keeps each run in a numbered run dir with the extracted texts and `summary.md`.
 - Prints the summary to stdout.
+- Logs progress to stderr and keeps a full log of each run in `run.log`.
 
 ## Tech stack
 
@@ -84,11 +85,15 @@ export CURSOR_API_KEY="<key>"
 ## Usage
 
 ```text
-python -m summary.main <input_folder> <output_dir>
+python -m summary.main [-v | -q] <input_folder> <output_dir>
 ```
 
 - `<input_folder>` — folder with the documents.
 - `<output_dir>` — dir for numbered run dirs; created if missing.
+- `-v`, `--verbose` — also show debug records on stderr, including one per PDF page saying whether the text layer or OCR was used.
+- `-q`, `--quiet` — show only warnings and errors on stderr.
+
+`-v` and `-q` cannot be combined.
 
 Only the top-level files of `<input_folder>` are read, in name order. Supported extensions are `.pdf`, `.jpg`, `.jpeg` and `.webp`, in any case. Other files and sub-folders are skipped.
 
@@ -100,13 +105,18 @@ Each run creates a new run dir `<output_dir>/<N>/`, where `N` is the largest exi
     document-1.txt
     document-2.txt
     summary.md
+    run.log
   2/
     ...
 ```
 
 `document-<n>.txt` holds the extracted text of each document. The agent writes `summary.md`, and the summary is also printed to stdout. The run dir is kept after success and after an agent failure.
 
-On error the tool prints `error: <message>` to stderr and exits with code 1. Examples: the input is not a folder, it has no supported file, or `CURSOR_API_KEY` is not set. On success the exit code is 0.
+stdout carries only the summary; logs go to stderr. At the default level INFO they show the run start, each read or skipped document with its text length and read time, the run dir creation, the agent start and end with its duration, and the total run time.
+
+`run.log` is UTF-8 and always at DEBUG level, whatever the flags. It holds the whole run from its start, including the document reading done before the run dir existed. It is written as the run goes, so an interrupted run keeps its records. On an error it holds the ERROR record with the traceback. There is no `run.log` when no run dir is created or when the run dir is removed after a failure. Document texts, the prompt, the summary and the API key are never logged.
+
+On error the tool prints `error: <message>` to stderr and exits with code 1. Examples: the input is not a folder, it has no supported file, or `CURSOR_API_KEY` is not set. The line is printed even with `-q`; the traceback appears on stderr only with `-v`. On success the exit code is 0.
 
 ## Project structure
 
