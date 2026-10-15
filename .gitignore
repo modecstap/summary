@@ -1,0 +1,9 @@
+# Agents
+.agents/plans/**
+
+# Claude Code
+.claude/plans/**
+.claude/worktrees/**
+.claude/settings.local.json
+.claude/__pycache__
+CLAUDE.local.md
