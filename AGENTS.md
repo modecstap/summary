@@ -4,7 +4,10 @@ TODO: one-line project description.
 
 ## Commands
 
-TODO: build / test / run commands (add once verified).
+PowerShell, project-local `.venv` (Python 3.12); never install into the global interpreter.
+
+- Setup: `python -m venv .venv; .venv\Scripts\python -m pip install -e ".[test]"`
+- Test: `.venv\Scripts\python -m pytest`. The first run downloads OCR models (about 13 MB) and needs network.
 
 ## Planning
 
