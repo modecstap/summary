@@ -8,6 +8,7 @@ PowerShell, project-local `.venv` (Python 3.12); never install into the global i
 
 - Setup: `python -m venv .venv; .venv\Scripts\python -m pip install -e ".[test]"`
 - Test: `.venv\Scripts\python -m pytest`. The first run downloads OCR models (about 13 MB) and needs network.
+- Run: from the repo root, `$env:CURSOR_API_KEY="<key>"; .venv\Scripts\python -m summary.main <input_folder> <output_dir>` — summarises the `.pdf/.jpg/.jpeg/.webp` files of the folder with the rules in `rules/summary.md`; each run creates `<output_dir>/<N>/`.
 
 ## Planning
 
