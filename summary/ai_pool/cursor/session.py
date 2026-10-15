@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import time
 import uuid
 
 from cursor_sdk import Agent, AgentOptions, CursorAgentError, CursorClient
@@ -34,6 +35,7 @@ class CursorAgentSession:
         agent_id = f"agent-{uuid.uuid4()}"
         options = dataclasses.replace(self._options, agent_id=agent_id)
         logger.info("agent starting, agent_id=%s", agent_id)
+        started = time.perf_counter()
         try:
             result = Agent.prompt(prompt, options, client=self._client)
         except CursorAgentError as error:
@@ -45,8 +47,8 @@ class CursorAgentSession:
                 f"prompt failed: {type(error).__name__}: {error}"
             ) from error
         logger.info(
-            "agent done, agent_id=%s, run_id=%s, status=%s",
-            agent_id, result.id, result.status,
+            "agent done, agent_id=%s, run_id=%s, status=%s, duration=%.1fs",
+            agent_id, result.id, result.status, time.perf_counter() - started,
         )
         if result.status != "finished":
             raise AgentRunError(f"run status: {result.status}")
