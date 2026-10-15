@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from .errors import AgentRunError, BridgeLaunchError, RulesFileError, SummaryError
@@ -23,7 +23,12 @@ class AIPool:
         self._launcher = launcher
         self._rules = rules
 
-    def summarize(self, documents: Sequence[str], output_dir: Path) -> PoolResult:
+    def summarize(
+        self,
+        documents: Sequence[str],
+        output_dir: Path,
+        on_run_dir: Callable[[Path], None] | None = None,
+    ) -> PoolResult:
         """
         Summarise the documents with one agent in a new run dir.
 
@@ -36,6 +41,8 @@ class AIPool:
         :param documents: non-empty list of document texts in input order;
             empty texts are allowed
         :param output_dir: dir of numbered run dirs
+        :param on_run_dir: called with the new run dir right after it is
+            created and filled; not called when no run dir is created
 
         :raises ValueError: when ``documents`` is empty
         :raises RulesFileError: when the rules file cannot be read as UTF-8
@@ -52,6 +59,8 @@ class AIPool:
         rules = self._read_rules()
         self._launcher.check()
         run_dir = create_run_dir(output_dir, documents)
+        if on_run_dir is not None:
+            on_run_dir(run_dir)
         files = [document_file(run_dir, n) for n in range(1, len(documents) + 1)]
         prompt = build_prompt(rules, files, summary_file(run_dir))
         try:

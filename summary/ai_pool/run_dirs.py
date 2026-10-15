@@ -38,6 +38,7 @@ def create_run_dir(output_dir: Path, documents: Sequence[str]) -> Path:
         except OSError as error:
             remove_run_dir(run_dir)
             raise RunDirError(f"cannot write {path}: {error}") from error
+    logger.info("run dir created: %s", run_dir)
     return run_dir
 
 

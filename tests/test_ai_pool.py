@@ -32,11 +32,13 @@ def rules(tmp_path):
 def test_summarize_writes_documents_and_returns_summary(tmp_path, rules):
     launcher = FakeLauncher(writes("Итог"))
     pool = AIPool(launcher, rules)
+    seen = []
 
-    result = pool.summarize(["Первый", "", "Третий"], tmp_path / "out")
+    result = pool.summarize(["Первый", "", "Третий"], tmp_path / "out", on_run_dir=seen.append)
 
     run_dir = (tmp_path / "out" / "1").resolve()
     assert (result.summary, result.run_dir) == ("Итог", run_dir)
+    assert seen == [run_dir]
     texts = [(run_dir / f"document-{n}.txt").read_text(encoding="utf-8") for n in (1, 2, 3)]
     assert texts == ["Первый", "", "Третий"]
     assert (run_dir / "summary.md").is_file()
